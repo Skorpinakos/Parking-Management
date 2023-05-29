@@ -106,9 +106,9 @@ def format_yolov5(frame):
 def closest_node(node, nodes):
     dist_2=[]
     for point in nodes:
-        dist_2.append((node[0]-point[0])**2+(node[0]-point[0])**2)
-    #print(dist_2)
-    #print(min(dist_2))
+        dist_2.append((node[0]-point[0])**2+(node[1]-point[1])**2)
+    print('diff list',dist_2)
+    print('minimum',min(dist_2))
     return dist_2.index(min(dist_2))
 
 def evaluate_parking_spot(centers_occupied):
@@ -117,13 +117,13 @@ def evaluate_parking_spot(centers_occupied):
         for line in file.read().split('\n')[:-1]:
             old_centers.append((int(line.split(",")[0]),int(line.split(",")[1])))
     old_centers.extend(centers_occupied)
-    print(centers_occupied)
+    print('current occupants',centers_occupied)
     occupied_parking_spots=[]
     unoccupied_parking_spots=[]
     if len(old_centers)>=10:
         test_space=range(2,8) #set possible parking spots multitude
         wcss=check_cluster_multitudes(test_space,old_centers) #check error for possible multitudes
-        plot_cluster_graph(test_space,wcss) #plot it
+        #plot_cluster_graph(test_space,wcss) #plot it
         n=find_elbow(wcss,test_space) #find the multitude on the elbow , how many parking spots there are
         #print(n)
         xs,ys,_=find_centroids(old_centers,n) #find centers for given multitude
@@ -134,13 +134,14 @@ def evaluate_parking_spot(centers_occupied):
             parking_spots.append((ys[position],xs[position]))
         
         parking_spots=sorted(parking_spots, key=lambda k: [k[1], k[0]]) #sort on a reading-line-type priority
+        print('parking spots',parking_spots)
         
         for occupant in centers_occupied:
             occupied_parking_spot=closest_node(occupant,parking_spots)
             occupied_parking_spots.append(occupied_parking_spot)
         unoccupied_parking_spots=list(range(0,n))
         unoccupied_parking_spots=list(set(unoccupied_parking_spots)-set(occupied_parking_spots))
-        print(unoccupied_parking_spots)
+        print('indexes',occupied_parking_spots)
 
     return occupied_parking_spots,unoccupied_parking_spots
         
@@ -158,7 +159,7 @@ def evaluate_parking_spot(centers_occupied):
 #### MAIN
 
 
-##client=connect_mqtt()
+#client=connect_mqtt()
 
 folder_dir = "edgeAI/dataset"
 images_names=os.listdir(folder_dir) #get dir list of filenames
@@ -174,11 +175,11 @@ for image_name in images_names:
     class_ids, confidences, boxes, centers = wrap_detection(inputImage, outs[0])
 
     # using older objects centers find parking spots and evaluate if they are occupied or not based on the current object centers
-    ##occupied_parking_spots,unoccupied_parking_spots=evaluate_parking_spot(centers)
-    ##for spot in occupied_parking_spots:
-        ##publish(client,"/iot/workshop/team01/parking/{}".format(spot),1)
-    ##for spot in unoccupied_parking_spots:
-        ##publish(client,"/iot/workshop/team01/parking/{}".format(spot),0)
+    occupied_parking_spots,unoccupied_parking_spots=evaluate_parking_spot(centers)
+    #for spot in occupied_parking_spots:
+        #publish(client,"/iot/workshop/team00/parking/{}".format(spot),1)
+    #for spot in unoccupied_parking_spots:
+        #publish(client,"/iot/workshop/team00/parking/{}".format(spot),0)
 
     for center in centers:
         cv2.circle(frame,center,20,(0,255,0),3) #draw circle at objects centers
@@ -196,6 +197,7 @@ for image_name in images_names:
     
 
     cv2.imshow("output", frame) #show image
-    cv2.waitKey(2000) #wait 2 seconds
+    cv2.waitKey(0) #wait 2 seconds
+    
 
 
