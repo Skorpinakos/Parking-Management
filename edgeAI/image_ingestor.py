@@ -197,7 +197,7 @@ for image_name in images_names:
     
 
     cv2.imshow("output", frame) #show image
-    cv2.waitKey(0) #wait 2 seconds
+    cv2.waitKey(3000) #wait 2 seconds
     
 
 

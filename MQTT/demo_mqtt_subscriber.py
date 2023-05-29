@@ -7,7 +7,7 @@ from paho.mqtt import client as mqtt_client
 
 broker = 'iot.patras5g.eu'
 port = 1872
-topic = "my_data"
+topic = "/iot/workshop/team00/parking/#"
 # generate client ID with pub prefix randomly
 client_id = f'python-mqtt-{random.randint(0, 100)}'
 
